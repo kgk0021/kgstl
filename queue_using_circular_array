@@ -1,0 +1,128 @@
+#include<iostream>
+template<typename T>
+struct queue_using_circular_array {
+
+	int front_index;
+	int back_index;
+	int cur_size;
+	int max_size;
+	T *arr;
+	queue_using_circular_array<T>() {
+		front_index = -1;
+		back_index = -1;
+		max_size = 1;
+		cur_size = 0;
+		arr = new T[1];
+	}
+	queue_using_circular_array<T>(int length) {
+		front_index = -1;
+		back_index = -1;
+		cur_size = 0;
+		max_size = length;
+		arr = new T[length];
+	}
+
+	int begin() {
+
+		return front_index;
+	}
+	int rbegin() {
+		return back_index;
+	}
+
+	void scaletodouble() {
+
+		int next_max_size = 2 * cur_size;
+		T * arrnew = new T[next_max_size];
+		for (int i = 0; i < cur_size; i++) {
+			arrnew[i] = arr[(back_index + i) % max_size];
+		}
+
+		delete[] arr;
+		back_index = 0;
+		front_index = cur_size - 1;
+		max_size = next_max_size;
+		arr = arrnew;
+
+	}
+
+	int getnextbackindex() {
+
+		if (back_index == -1)
+			return 0;
+		return (max_size + (back_index - 1) % max_size) % max_size;
+	}
+
+	int getnextfrontindex() {
+		if (front_index == -1)
+			return 0;
+		return (max_size + (front_index + 1) % max_size) % max_size;
+	}
+
+	int getpreviousfrontindex() {
+
+		return (max_size + (front_index - 1) % max_size) % max_size;
+	}
+	int getpreviousbackindex() {
+		return (max_size + (back_index + 1) % max_size) % max_size;
+	}
+	void push_back(T data) {
+
+		if (cur_size == max_size)
+			scaletodouble();
+		int index = getnextbackindex();
+		arr[index] = data;
+		if (cur_size == 0) {
+			front_index = index;
+		}
+		back_index = index;
+		cur_size++;
+
+	}
+	void push_front(T data) {
+		if (cur_size == max_size)
+			scaletodouble();
+		int index = getnextfrontindex();
+		arr[index] = data;
+		if (cur_size == 0) {
+			back_index = index;
+		}
+		front_index = index;
+		cur_size++;
+	}
+	void pop_back() {
+
+		if (cur_size == 1) {
+			front_index = -1;
+			back_index = -1;
+
+		} else {
+			back_index = getpreviousbackindex();
+		}
+		cur_size--;
+	}
+	void pop_front() {
+		if (cur_size == 1) {
+			front_index = -1;
+			back_index = -1;
+		} else {
+			front_index = getpreviousfrontindex();
+
+		}
+
+		cur_size--;
+	}
+	T back() {
+		return arr[back_index];
+	}
+	T front() {
+		return arr[front_index];
+	}
+	int size() {
+		return cur_size;
+	}
+	bool isempty() {
+		return size() == 0;
+	}
+
+};
