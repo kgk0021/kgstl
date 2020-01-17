@@ -11,15 +11,15 @@ struct listnode {
 	}
 };
 template<typename T>
-struct listx {
+struct dequeue_using_linked_list {
 
 	listnode<T> * frontnode;
 	listnode<T> * backnode;
-	int length;
-	listx<T>() {
+	int cur_size;
+	dequeue_using_linked_list<T>() {
 		frontnode = NULL;
 		backnode = NULL;
-		length = 0;
+		cur_size = 0;
 	}
 
 	listnode<T> * begin() {
@@ -33,7 +33,7 @@ struct listx {
 	void push_back(T data) {
 		listnode<T> *node = new listnode<T>(data);
 		if (backnode) {
- 
+
 			node->next = backnode;
 			backnode->pre = node;
 
@@ -41,7 +41,7 @@ struct listx {
 			frontnode = node;
 		}
 		backnode = node;
-		length++;
+		cur_size++;
 	}
 	void push_front(T data) {
 		listnode<T> *node = new listnode<T>(data);
@@ -52,7 +52,7 @@ struct listx {
 			backnode = node;
 		}
 		frontnode = node;
-		length++;
+		cur_size++;
 	}
 	void pop_back() {
 		listnode<T>* node = backnode;
@@ -64,7 +64,7 @@ struct listx {
 			frontnode = NULL;
 		}
 		delete (node);
-		length--;
+		cur_size--;
 
 	}
 	void pop_front() {
@@ -78,7 +78,7 @@ struct listx {
 			backnode = NULL;
 		}
 		delete (node);
-		length--;
+		cur_size--;
 	}
 	T back() {
 		return backnode->data;
@@ -87,7 +87,7 @@ struct listx {
 		return frontnode->data;
 	}
 	int size() {
-		return length;
+		return cur_size;
 	}
 	bool isempty() {
 		return size() == 0;
