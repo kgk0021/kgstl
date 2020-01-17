@@ -33,7 +33,7 @@ struct listx {
 	void push_back(T data) {
 		listnode<T> *node = new listnode<T>(data);
 		if (backnode) {
-
+ 
 			node->next = backnode;
 			backnode->pre = node;
 
