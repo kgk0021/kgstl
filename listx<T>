@@ -1,0 +1,96 @@
+#include<iostream>
+template<typename T>
+struct listnode {
+	listnode<T> * next;
+	listnode<T> * pre;
+	T data;
+	listnode(T data) {
+		this->data = data;
+		this->pre = NULL;
+		this->next = NULL;
+	}
+};
+template<typename T>
+struct listx {
+
+	listnode<T> * frontnode;
+	listnode<T> * backnode;
+	int length;
+	listx<T>() {
+		frontnode = NULL;
+		backnode = NULL;
+		length = 0;
+	}
+
+	listnode<T> * begin() {
+
+		return frontnode;
+	}
+	listnode<T> * rbegin() {
+		return backnode;
+	}
+
+	void push_back(T data) {
+		listnode<T> *node = new listnode<T>(data);
+		if (backnode) {
+
+			node->next = backnode;
+			backnode->pre = node;
+
+		} else {
+			frontnode = node;
+		}
+		backnode = node;
+		length++;
+	}
+	void push_front(T data) {
+		listnode<T> *node = new listnode<T>(data);
+		if (frontnode) {
+			frontnode->next = node;
+			node->pre = frontnode;
+		} else {
+			backnode = node;
+		}
+		frontnode = node;
+		length++;
+	}
+	void pop_back() {
+		listnode<T>* node = backnode;
+		if (backnode->next) {
+			backnode = backnode->next;
+			backnode->pre = NULL;
+		} else {
+			backnode = NULL;
+			frontnode = NULL;
+		}
+		delete (node);
+		length--;
+
+	}
+	void pop_front() {
+		listnode<T> * node = frontnode;
+		if (frontnode->pre) {
+			frontnode = frontnode->pre;
+			frontnode->next = NULL;
+
+		} else {
+			frontnode = NULL;
+			backnode = NULL;
+		}
+		delete (node);
+		length--;
+	}
+	T back() {
+		return backnode->data;
+	}
+	T front() {
+		return frontnode->data;
+	}
+	int size() {
+		return length;
+	}
+	bool isempty() {
+		return size() == 0;
+	}
+
+};
