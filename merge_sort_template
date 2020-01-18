@@ -1,0 +1,39 @@
+#include<iostream>
+template<typename T>
+
+void merge(T*ar, int begin, int end, bool cmp(T, T)) {
+	int m = (begin + end) / 2;
+	int sizel = m - begin + 1;
+	int sizer = end - m;
+	T * arl[sizel];
+	T * arr[sizer];
+	for (int i = 0; i < sizel; i++) {
+		arl[i] = ar[i + begin];
+	}
+	for (int i = 0; i < sizer; i++) {
+		arr[i] = ar[m + 1 + i];
+	}
+	int indexl = 0;
+	int indexr = 0;
+	int index = begin;
+	while (indexl < sizel and indexr < sizer) {
+		if (cmp(arl[indexl], arr[indexr])) {
+			ar[index++] = arl[indexl++];
+		} else {
+			ar[index++] = arr[indexr++];
+		}
+	}
+	while (indexl < sizel)
+		ar[index++] = arl[indexl++];
+	while (indexr < sizer)
+		ar[index++] = arr[indexr++];
+}
+template<typename T>
+void mergesort(T* ar, int begin, int end, bool cmp(T, T)) {
+	if (begin < end) {
+		int m = (begin + end) / 2;
+		mergesort(ar, begin, m, cmp);
+		mergesort(ar, m + 1, end, cmp);
+		merge(ar, begin, end, cmp);
+	}
+}
