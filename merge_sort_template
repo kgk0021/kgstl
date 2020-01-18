@@ -28,6 +28,8 @@ void merge(T*ar, int begin, int end, bool cmp(T, T)) {
 	while (indexr < sizer)
 		ar[index++] = arr[indexr++];
 }
+
+
 template<typename T>
 void mergesort(T* ar, int begin, int end, bool cmp(T, T)) {
 	if (begin < end) {
@@ -36,4 +38,8 @@ void mergesort(T* ar, int begin, int end, bool cmp(T, T)) {
 		mergesort(ar, m + 1, end, cmp);
 		merge(ar, begin, end, cmp);
 	}
+}
+template<typename T>
+bool cmp(T first_if_true, T first_if_false){
+ return first_if_true<first_if_false;
 }
