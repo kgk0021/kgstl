@@ -1,0 +1,139 @@
+#include<iostream>
+
+template<typename T>
+struct kgHeap {
+
+	int max_size;
+	int cur_size;
+	T * heap_array;
+	std::function<bool(T, T)> comparator;
+
+	kgHeap(int size, bool cmp(T, T)) {
+		heap_array = new T[size];
+		cur_size = 0;
+		max_size = size;
+		comparator = cmp;
+
+	}
+	kgHeap(bool cmp(T, T)) {
+		heap_array = new T[1];
+		cur_size = 0;
+		max_size = 1;
+		comparator = cmp;
+	}
+	kgHeap(T ar[], int size, bool cmp(T, T)) {
+		heap_array = ar;
+		cur_size = size;
+		max_size = size;
+		comparator = cmp;
+	}
+	void scalebydouble() {
+		int newsize = 2 * cur_size;
+		T * ar = new T[newsize];
+		for (int i = 0; i < cur_size; i++) {
+			ar[i] = heap_array[i];
+		}
+		delete[] heap_array;
+		heap_array = ar;
+	}
+	int leftchild(int i) {
+		return 2 * i + 1;
+	}
+	int rightchild(int i) {
+		return 2 * i + 2;
+	}
+	int getparent(int i) {
+		return (i - 1) / 2;
+	}
+	int size() {
+		return cur_size;
+	}
+	bool isempty() {
+		return cur_size == 0;
+	}
+	T top() {
+		return heap_array[0];
+	}
+	void heapifyup(int i) {
+
+		int parent = getparent(i);
+		while (parent >= 0 and cmp(parent, i)) {
+			swap(heap_array[parent], heap_array[i]);
+			i = parent;
+			parent = getparent(parent);
+		}
+
+	}
+	void swap(T & l, T&r) {
+		T temp = l;
+		l = r;
+		r = temp;
+	}
+	void heapifydown(int parent) {
+
+		int left = leftchild(parent);
+		int right = rightchild(parent);
+		int top_candidate = parent;
+		if (left < cur_size)
+			top_candidate = cmp(left, parent) ? parent : left;
+		if (right < cur_size)
+			top_candidate = cmp(right, top_candidate) ? top_candidate : right;
+		if (top_candidate != parent) {
+			swap(heap_array[top_candidate], heap_array[parent]);
+			heapifydown(top_candidate);
+		}
+	}
+	void push(T data) {
+		if (cur_size == max_size)
+			scalebydouble();
+		heap_array[cur_size] = data;
+		cur_size++;
+		heapifyup(cur_size - 1);
+
+	}
+	void pop() {
+		heap_array[0] = heap_array[cur_size - 1];
+		cur_size--;
+		heapifydown(0);
+	}
+	bool cmp(int false_for_top, int true_for_top) {
+		return comparator(heap_array[false_for_top], heap_array[true_for_top]);
+	}
+
+	void erase(int index) {
+		heap_array[index] = heap_array[cur_size - 1];
+		cur_size--;
+		heapifydown(index);
+	}
+	void heapifyheap() {
+
+		int limit = floor(((float) cur_size / (float) 2));
+		for (int i = limit - 1; i >= 0; i--) {
+			heapifydown(i);
+		}
+	}
+	void sort() {
+		heapifyheap();
+		int index_to_be_heaped = cur_size;
+		for (int i = index_to_be_heaped - 1; i >= 0; i--) {
+			swap(heap_array[i], heap_array[0]);
+			cur_size--;
+			heapifydown(0);
+		}
+	}
+	void updateindex(int index, int value) {
+		erase(index);
+		push(value);
+		///
+		///one can do below for sure if not want to erase and push
+		///
+//		if (comparator(heap_array[index], value)) {
+//			heap_array[index] = value;
+//			heapifyup(index);
+//		} else {
+//			heap_array[index] = value;
+//			heapifydown(index);
+//		}
+	}
+
+};
