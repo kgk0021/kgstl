@@ -1,5 +1,7 @@
 #include<iostream>
-#include<functional>
+#include <functional>
+using namespace std::placeholders;
+
 template<typename T>
 struct kgHeap {
 
@@ -15,6 +17,12 @@ struct kgHeap {
 		comparator = cmp;
 
 	}
+	kgHeap() {
+		heap_array = new T[1];
+		cur_size = 0;
+		max_size = 1;
+		comparator = std::bind(privatecmp, this, _1, _2);
+	}
 	kgHeap(bool cmp(T, T)) {
 		heap_array = new T[1];
 		cur_size = 0;
@@ -26,6 +34,11 @@ struct kgHeap {
 		cur_size = size;
 		max_size = size;
 		comparator = cmp;
+	}
+
+	bool privatecmp(T key1, T key2) {
+
+		return key1 < key2;
 	}
 	void scalebydouble() {
 		int newsize = 2 * cur_size;
@@ -107,7 +120,8 @@ struct kgHeap {
 	}
 	void heapifyheap() {
 
-		int limit = floor(((float) cur_size / (float) 2));
+		int limit = cur_size / 2;
+		//= floor(((float) cur_size / (float) 2));
 		for (int i = limit - 1; i >= 0; i--) {
 			heapifydown(i);
 		}
@@ -135,5 +149,38 @@ struct kgHeap {
 //			heapifydown(index);
 //		}
 	}
+	void print() {
+		for (int i = 0; i < cur_size; i++) {
+			std::cout << heap_array[i] << " ";
+		}
+		std::cout << "\n";
+	}
 
 };
+
+bool cmp(int a, int b) {
+	return a < b;
+}
+int main() {
+
+	/*
+	 * using default maxheap comparator
+	 * */
+	kgHeap<int> heap;
+	//= kgHeap<int>(cmp);
+	heap.push(89);
+	heap.push(12);
+	heap.print();
+	std::cout << heap.size() << "\n";
+
+	/*
+	 * using your own customized comparator*/
+	kgHeap<int> heaps = kgHeap<int>(cmp);
+	heaps.push(849);
+	heaps.push(142);
+	heaps.pop();
+	heaps.print();
+	std::cout << heaps.size() << "\n";
+
+	return 0;
+}
