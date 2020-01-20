@@ -184,10 +184,10 @@ struct AVLmap {
 			return NULL;
 		if (node->data == keys)
 			return node;
-		if (comparator(keys, node->data))
+		if (comparator( node->data,keys))
 			return findutil(keys, node->left);
 		else
-			return findutil(keys, node->right);
+			return findutil(node->right,keys);
 
 	}
 
