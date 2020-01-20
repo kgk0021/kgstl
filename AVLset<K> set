@@ -184,9 +184,9 @@ struct AVLset {
 		if (node->data == keys)
 			return node;
 		if (comparator(keys, node->data))
-			return findutil(keys, node->left);
+			return findutil(node->left,keys);
 		else
-			return findutil(keys, node->right);
+			return findutil(node->right,keys);
 
 	}
 
