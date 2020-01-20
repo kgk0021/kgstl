@@ -1,5 +1,5 @@
 #include<iostream>
-
+#include<functional>
 template<typename T>
 struct kgHeap {
 
