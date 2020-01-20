@@ -1,0 +1,249 @@
+#include<iostream>
+#include<functional>
+using namespace std;
+using namespace std::placeholders;
+
+template<typename K>
+struct AVLset {
+
+	struct Node {
+
+		Node * left;
+		Node * right;
+		K data;
+		int height;
+		Node(K keyfunc) {
+
+			data = keyfunc;
+			left = NULL;
+			right = NULL;
+			height = 1;
+
+		}
+	};
+	Node * root;
+	int cur_size;
+
+	std::function<bool(K, K)> comparator;
+
+	AVLset(bool cmp(K, K)) {
+		cur_size = 0;
+		root = NULL;
+		comparator = cmp;
+	}
+
+	bool privatecmp(K key1, K key2) {
+		return key1 < key2;
+	}
+//	std::function<bool(K, K)>  func(){
+//		return privatecmp;
+//	}
+	AVLset() {
+		cur_size = 0;
+		root = NULL;
+		comparator = std::bind(privatecmp, this, _1, _2);
+	}
+
+	void insert(K key) {
+
+		root = insertutil(root, key);
+	}
+	Node * getroot() {
+		return root;
+	}
+	int getbalance(Node * node) {
+		int left = getNodeHeight(node->left);
+		int right = getNodeHeight(node->right);
+		return right - left;
+	}
+
+	Node * insertutil(Node * node, K key) {
+		if (!node)
+			return new Node(key);
+		if (node->data == key) {
+
+			return node;
+		} else if (comparator(key, node->data)) {
+			node->left = insertutil(node->left, key);
+		} else {
+			node->right = insertutil(node->right, key);
+		}
+
+		return balanceNode(node);
+
+	}
+
+	Node * balanceNode(Node * node) {
+		int balance = getbalance(node);
+		node->height = std::max(getNodeHeight(node->left),
+				getNodeHeight(node->right)) + 1;
+		if (balance < -1) {
+			if (getNodeHeight(node->left->left)
+					< getNodeHeight(node->left->right))
+				node->left = leftrotate(node->left);
+
+			return rightrotate(node);
+
+		} else if (balance > 1) {
+			if (getNodeHeight(node->right->right)
+					< getNodeHeight(node->right->left))
+				node->right = rightrotate(node->right);
+
+			return leftrotate(node);
+
+		}
+		return node;
+	}
+
+	Node * rightrotate(Node * node) {
+
+		Node * main = node->left;
+		Node * child = main->right;
+		node->left = child;
+		main->right = node;
+		node->height = std::max(getNodeHeight(node->right),
+				getNodeHeight(node->left)) + 1;
+		main->height = std::max(getNodeHeight(main->left),
+				getNodeHeight(main->right)) + 1;
+		return main;
+
+	}
+	Node * leftrotate(Node * node) {
+		Node * main = node->right;
+		Node * child = main->left;
+		node->right = child;
+		main->left = node;
+		node->height = std::max(getNodeHeight(node->left),
+				getNodeHeight(node->right)) + 1;
+		main->height = std::max(getNodeHeight(main->left),
+				getNodeHeight(main->right)) + 1;
+		return main;
+
+	}
+	void erase(K key) {
+		root = eraseutil(root, key);
+	}
+
+	Node * plucksuccessorNode(Node * node, Node * & suc) {
+		if (!node)
+			return node;
+		if (!node->left) {
+			suc = node;
+			return node->right;
+
+		}
+		node->left = plucksuccessorNode(node->left, suc);
+
+		return balanceNode(node);
+
+	}
+	Node * eraseutil(Node * node, K key) {
+		if (!node)
+			return node;
+		if (node->data == key) {
+			if (!node->left) {
+				Node * rnode = node->right;
+				delete node;
+				return rnode;
+			}
+			if (!node->right) {
+				Node * rnode = node->left;
+				delete node;
+				return rnode;
+			}
+
+			Node *sucNode = NULL;
+			node->right = plucksuccessorNode(node->right, sucNode);
+			sucNode->right = node->right;
+			sucNode->left = node->left;
+			node = sucNode;
+
+		} else if (comparator(key, node->data))
+			node->left = eraseutil(node->left, key);
+		else
+			node->right = eraseutil(node->right, key);
+
+		return balanceNode(node);
+
+	}
+	Node* find(K key) {
+
+		return findutil(root, key);
+
+	}
+
+	int getNodeHeight(Node * node) {
+		if (!node)
+			return 0;
+		return node->height;
+	}
+	Node* findutil(Node * node, K keys) {
+
+		if (!node)
+			return NULL;
+		if (node->data == keys)
+			return node;
+		if (comparator(keys, node->data))
+			return findutil(keys, node->left);
+		else
+			return findutil(keys, node->right);
+
+	}
+
+	int size() {
+		return cur_size;
+	}
+	bool isempty() {
+		return cur_size == 0;
+	}
+
+	void print() {
+		printutil(root);
+	}
+	void printutil(Node * root) {
+		if (!root)
+			return;
+		printutil(root->left);
+		std::cout << root->data << " "<< " " << root->height
+				<< "\n";
+		printutil(root->right);
+	}
+};
+
+bool cmp(int a, int b) {
+
+	return a < b;
+}
+int main() {
+	AVLset<int> defaultset;
+	/*
+	 * by default comparator
+	 * */
+
+	defaultset.insert(2);
+	defaultset.insert(2);
+	defaultset.print();
+	defaultset.erase(4);
+	defaultset.print();
+	defaultset.erase(2);
+	defaultset.print();
+
+
+	/*
+	 *
+	 * by passsing comparator*/
+	AVLset<int> setcustom = AVLset<int>(cmp);
+
+	setcustom.insert(2);
+	setcustom.insert(12);
+	setcustom.insert(2);
+   setcustom.insert(12);
+	setcustom.insert(1);
+	setcustom.print();
+	setcustom.erase(4);
+	setcustom.erase(2);
+	setcustom.erase(12);
+	setcustom.print();
+
+	return 0;
+}
