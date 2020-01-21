@@ -1,5 +1,7 @@
 #include<iostream>
 template<typename T>
+struct dequeue_using_linked_list {
+
 struct listnode {
 	listnode<T> * next;
 	listnode<T> * pre;
@@ -10,9 +12,6 @@ struct listnode {
 		this->next = NULL;
 	}
 };
-template<typename T>
-struct dequeue_using_linked_list {
-
 	listnode<T> * frontnode;
 	listnode<T> * backnode;
 	int cur_size;
