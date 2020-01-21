@@ -24,16 +24,21 @@ struct AVLset {
 	Node * root;
 	int cur_size;
 
-	std::function<bool(K, K)> comparator;
+	std::function<bool(K, K)> lessthancomparator;
+	std::function<bool(K, K)> equaltocomparator;
 
-	AVLset(bool cmp(K, K)) {
+	AVLset(bool cmp1(K, K), bool cmp2(K, K)) {
 		cur_size = 0;
 		root = NULL;
-		comparator = cmp;
+		lessthancomparator = cmp1;
+		equaltocomparator = cmp2;
 	}
 
-	bool privatecmp(K key1, K key2) {
+	bool privatecmp1(K key1, K key2) {
 		return key1 < key2;
+	}
+	bool privatecmp2(K key1, K key2) {
+		return key1 == key2;
 	}
 //	std::function<bool(K, K)>  func(){
 //		return privatecmp;
@@ -41,7 +46,8 @@ struct AVLset {
 	AVLset() {
 		cur_size = 0;
 		root = NULL;
-		comparator = std::bind(privatecmp, this, _1, _2);
+		lessthancomparator = std::bind(privatecmp1, this, _1, _2);
+		equaltocomparator = std::bind(privatecmp2, this, _1, _2);
 	}
 
 	void insert(K key) {
@@ -60,10 +66,10 @@ struct AVLset {
 	Node * insertutil(Node * node, K key) {
 		if (!node)
 			return new Node(key);
-		if (node->data == key) {
+		if (equaltocomparator(node->data, key)) {
 
 			return node;
-		} else if (comparator(key, node->data)) {
+		} else if (lessthancomparator(key, node->data)) {
 			node->left = insertutil(node->left, key);
 		} else {
 			node->right = insertutil(node->right, key);
@@ -140,7 +146,7 @@ struct AVLset {
 	Node * eraseutil(Node * node, K key) {
 		if (!node)
 			return node;
-		if (node->data == key) {
+		if (equaltocomparator(node->data, key)) {
 			if (!node->left) {
 				Node * rnode = node->right;
 				delete node;
@@ -158,7 +164,7 @@ struct AVLset {
 			sucNode->left = node->left;
 			node = sucNode;
 
-		} else if (comparator(key, node->data))
+		} else if (lessthancomparator(key, node->data))
 			node->left = eraseutil(node->left, key);
 		else
 			node->right = eraseutil(node->right, key);
@@ -181,12 +187,12 @@ struct AVLset {
 
 		if (!node)
 			return NULL;
-		if (node->data == keys)
+		if (equaltocomparator(node->data, keys))
 			return node;
-		if (comparator(keys, node->data))
-			return findutil(node->left,keys);
+		if (lessthancomparator(keys, node->data))
+			return findutil(node->left, keys);
 		else
-			return findutil(node->right,keys);
+			return findutil(node->right, keys);
 
 	}
 
@@ -204,45 +210,55 @@ struct AVLset {
 		if (!root)
 			return;
 		printutil(root->left);
-		std::cout << root->data << " "<< " " << root->height
-				<< "\n";
+		std::cout << root->data << " " << " " << root->height << "\n";
 		printutil(root->right);
 	}
 };
 
-bool cmp(int a, int b) {
+bool cmp1(int a, int b) {
 
 	return a < b;
+}
+bool cmp2(int a, int b) {
+
+	return a == b;
 }
 int main() {
 	AVLset<int> defaultset;
 	/*
-	 * by default comparator
+	 * by default lessthancomparator
 	 * */
 
 	defaultset.insert(2);
 	defaultset.insert(2);
-	defaultset.print();
-	defaultset.erase(4);
-	defaultset.print();
-	defaultset.erase(2);
+
 	defaultset.print();
 
+	defaultset.erase(4);
+
+	defaultset.print();
+
+	defaultset.erase(2);
+
+	defaultset.print();
 
 	/*
 	 *
-	 * by passsing comparator*/
-	AVLset<int> setcustom = AVLset<int>(cmp);
+	 * by passsing lessthancomparator  and equal to comparator*/
+	AVLset<int> setcustom = AVLset<int>(cmp1, cmp2);
 
 	setcustom.insert(2);
 	setcustom.insert(12);
 	setcustom.insert(2);
-   setcustom.insert(12);
+	setcustom.insert(12);
 	setcustom.insert(1);
+
 	setcustom.print();
+
 	setcustom.erase(4);
 	setcustom.erase(2);
 	setcustom.erase(12);
+
 	setcustom.print();
 
 	return 0;
