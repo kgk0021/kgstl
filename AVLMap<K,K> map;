@@ -25,16 +25,21 @@ struct AVLmap {
 	Node * root;
 	int cur_size;
 
-	std::function<bool(K, K)> comparator;
+	std::function<bool(K, K)> lessthancomparator;
+	std::function<bool(K, K)> equaltocomparator;
 
-	AVLmap(bool cmp(K, K)) {
+	AVLmap(bool cmp1(K, K), bool cmp2(K, K)) {
 		cur_size = 0;
 		root = NULL;
-		comparator = cmp;
+		lessthancomparator = cmp1;
+		equaltocomparator = cmp2;
 	}
 
-	bool privatecmp(K key1, K key2) {
+	bool privatecmp1(K key1, K key2) {
 		return key1 < key2;
+	}
+	bool privatecmp2(K key1, K key2) {
+		return key1 == key2;
 	}
 //	std::function<bool(K, K)>  func(){
 //		return privatecmp;
@@ -42,7 +47,8 @@ struct AVLmap {
 	AVLmap() {
 		cur_size = 0;
 		root = NULL;
-		comparator = std::bind(privatecmp, this, _1, _2);
+		lessthancomparator = std::bind(privatecmp1, this, _1, _2);
+		equaltocomparator = std::bind(privatecmp2, this, _1, _2);
 	}
 
 	void insert(K key, V value) {
@@ -61,10 +67,10 @@ struct AVLmap {
 	Node * insertutil(Node * node, K key, V value) {
 		if (!node)
 			return new Node(key, value);
-		if (node->data == key) {
+		if (equaltocomparator(node->data, key)) {
 			node->value = value;
 			return node;
-		} else if (comparator(key, node->data)) {
+		} else if (lessthancomparator(key, node->data)) {
 			node->left = insertutil(node->left, key, value);
 		} else {
 			node->right = insertutil(node->right, key, value);
@@ -141,7 +147,7 @@ struct AVLmap {
 	Node * eraseutil(Node * node, K key) {
 		if (!node)
 			return node;
-		if (node->data == key) {
+		if (equaltocomparator(node->data, key)) {
 			if (!node->left) {
 				Node * rnode = node->right;
 				delete node;
@@ -159,7 +165,7 @@ struct AVLmap {
 			sucNode->left = node->left;
 			node = sucNode;
 
-		} else if (comparator(key, node->data))
+		} else if (lessthancomparator(key, node->data))
 			node->left = eraseutil(node->left, key);
 		else
 			node->right = eraseutil(node->right, key);
@@ -182,12 +188,12 @@ struct AVLmap {
 
 		if (!node)
 			return NULL;
-		if (node->data == keys)
+		if (equaltocomparator(node->data, keys))
 			return node;
-		if (comparator( node->data,keys))
+		if (lessthancomparator(node->data, keys))
 			return findutil(keys, node->left);
 		else
-			return findutil(node->right,keys);
+			return findutil(node->right, keys);
 
 	}
 
@@ -211,9 +217,13 @@ struct AVLmap {
 	}
 };
 
-bool cmp(int a, int b) {
+bool lessthancmp(int a, int b) {
 
 	return a < b;
+}
+bool equaltocmp(int a, int b) {
+
+	return a == b;
 }
 int main() {
 	AVLmap<int, int> mp;
@@ -228,7 +238,7 @@ int main() {
 	/*
 	 *
 	 * by passsing comparator*/
-	AVLmap<int, int> mps = AVLmap<int, int>(cmp);
+	AVLmap<int, int> mps = AVLmap<int, int>(lessthancmp, equaltocmp);
 
 	mps.insert(2, 7);
 	mps.insert(12, 7);
@@ -238,7 +248,6 @@ int main() {
 	mps.erase(2);
 	mps.erase(12);
 	mps.print();
-
 
 	return 0;
 }
