@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int get_max_part_poss(vector<int> & nums, int tar, bool & flag) {
+	int cnt = 0;
+	int sum = 0;
+	for (int a : nums) {
+		sum += a;
+
+		if (sum == tar)
+			flag = true;
+		if (sum >= tar) {
+			sum = 0;
+			cnt++;
+		}
+
+	}
+	return cnt;
+}
+
+vector<long long> prepare_sum_array(vector<int> & nums) {
+	vector<long long> sum_array(nums.size(), 0);
+	long long pre = 0;
+	for (int i = 0; i < nums.size(); i++) {
+		sum_array[i] = (long long) nums[i] + pre;
+		pre = sum_array[i];
+	}
+	return sum_array;
+}
+long long get_sum(int l, int r, vector<long long> & sum_array) {
+	if (l == 0)
+		return sum_array[r];
+	return sum_array[r] - sum_array[l - 1];
+}
+
+long long getans(vector<long long> & sum_array, vector<vector<long long>> & dp,
+		int m) {
+
+	int n = sum_array.size();
+	for (int i = 0; i < n; i++)
+		dp[i][1] = get_sum(0, i, sum_array);
+
+	for (int k = 2; k <= m; k++) {
+
+		for (int i = k - 1; i < n; i++) {
+			for (int j = i; j >= 0 and j + 1 >= k; j--) {
+				dp[i][k] = max(dp[i][k],
+						min(get_sum(j, i, sum_array), dp[j - 1][k - 1]));
+			}
+		}
+	}
+	return dp[n - 1][m];
+
+}
+int painterPartitionProblemDP(vector<int>& nums, int m) {
+
+	vector<long long> sum_array = prepare_sum_array(nums);
+	vector<vector<long long>> dp(nums.size(),
+			vector<long long>(m + 1, LONG_LONG_MIN));
+
+	int ans = getans(sum_array, dp, m);
+
+	return ans;
+
+}
+int painterPartitionProblemSearchForMinimumOptimization(vector<int>& nums, int m) {
+
+	int sum = 0;
+	for (int a : nums)
+		sum += a;
+	int mn = *min_element(nums.begin(), nums.end());
+	int ans = -1;
+	cout << mn << "  " << sum << " " << m << endl;
+	while (mn <= sum) {
+
+		int mid = mn + (sum - mn) / 2;
+		cout << mn << "   " << mid << "  " << sum << endl;
+		bool flag = false;
+		int min_no_par_poss = get_max_part_poss(nums, mid, flag);
+		if (flag and min_no_par_poss == m)
+			ans = mid;
+
+		cout << flag << "  " << min_no_par_poss << endl;
+		if (min_no_par_poss >= m) {
+			mn = mid + 1;
+
+		} else {
+			sum = mid - 1;
+		}
+	}
+	return ans;
+
+}
