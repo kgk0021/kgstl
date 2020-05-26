@@ -1,0 +1,149 @@
+class Combinatorics {
+
+private:
+	int n;
+	int k;
+	vector<int> unique_vec;
+	vector<int> unique_vec_element_cnt;
+	vector<int> occupied_elements_unique_vec;
+	vector<int> index_in_unique_vec;
+	vector<int> wanted_vec_index_in_unique_vec;
+
+	bool isNextavail = false;
+
+	void getuniquevec(vector<int> & unique_vec,
+			vector<int> & unique_vec_element_cnt, vector<int> & vec) {
+		sort(vec.begin(), vec.end());
+		int i = 0;
+		int n = vec.size();
+		while (i < n) {
+			int j = i + 1;
+			while (j < n and vec[i] == vec[j])
+				j++;
+
+			unique_vec.push_back(vec[i]);
+			unique_vec_element_cnt.push_back(j - i);
+			i = j;
+		}
+	}
+public:
+	Combinatorics(vector<int> vec, int k) {
+		int n1 = vec.size();
+		if (n1 < 0 || k < 0 || n1 < k)
+			return;
+
+		getuniquevec(this->unique_vec, this->unique_vec_element_cnt, vec);
+		this->occupied_elements_unique_vec = vector<int>(unique_vec.size(), 0);
+		this->n = unique_vec.size();
+		this->k = k;
+
+		this->index_in_unique_vec = vector<int>(k);
+		this->isNextavail = true;
+		int cur = 0;
+		for (int i = 0; i < k; i++) {
+			index_in_unique_vec[i] = cur;
+			this->occupied_elements_unique_vec[cur]++;
+			if (occupied_elements_unique_vec[cur]
+					== unique_vec_element_cnt[cur])
+				cur++;
+
+		}
+
+		int state_idx = k - 1;
+		int idx_unique_vec = this->n - 1;
+		this->wanted_vec_index_in_unique_vec = vector<int>(k);
+		while (state_idx >= 0) {
+
+			int cnt = unique_vec_element_cnt[idx_unique_vec];
+			while (state_idx >= 0 and cnt--) {
+				this->wanted_vec_index_in_unique_vec[state_idx--] = idx_unique_vec;
+			}
+			idx_unique_vec--;
+		}
+
+	}
+	bool hasNext() {
+		return isNextavail;
+	}
+	vector<int> next() {
+
+		if (!isNextavail)
+			return vector<int>();
+		vector<int> ans(k);
+		dfs(ans);
+		return ans;
+	}
+
+private:
+	void dfs(vector<int> & ans) {
+		for (int i = 0; i < k; i++)
+			ans[i] = unique_vec[index_in_unique_vec[i]];
+		incrementone(index_in_unique_vec);
+	}
+	void incrementone(vector<int> & index_in_unique_vec) {
+		if (index_in_unique_vec[k - 1] != n - 1) {
+
+			occupied_elements_unique_vec[index_in_unique_vec[k - 1]]--;
+			index_in_unique_vec[k - 1]++;
+			occupied_elements_unique_vec[index_in_unique_vec[k - 1]]++;
+			return;
+		}
+		int cntinouse_cnt = getcontonousecount();
+		if (cntinouse_cnt == k) {
+			isNextavail = false;
+			return;
+		}
+		int state_idx = k - cntinouse_cnt;
+
+		while (state_idx < k) {
+
+			occupied_elements_unique_vec[index_in_unique_vec[state_idx]]--;
+
+			state_idx++;
+		}
+
+		state_idx = k - cntinouse_cnt - 1;
+		occupied_elements_unique_vec[index_in_unique_vec[state_idx]]--;
+		int new_idx_unique_vec = index_in_unique_vec[state_idx] + 1;
+
+		while (state_idx < k) {
+
+			index_in_unique_vec[state_idx] = new_idx_unique_vec;
+			occupied_elements_unique_vec[new_idx_unique_vec]++;
+
+			if (occupied_elements_unique_vec[new_idx_unique_vec]
+					== unique_vec_element_cnt[new_idx_unique_vec])
+				new_idx_unique_vec++;
+			state_idx++;
+		}
+	}
+
+	int getcontonousecount() {
+
+		int state_idx = k - 1;
+		int cnt = 0;
+		while (state_idx >= 0
+				and wanted_vec_index_in_unique_vec[state_idx] == index_in_unique_vec[state_idx]) {
+			cnt++;
+			state_idx--;
+
+		}
+		return cnt;
+	}
+
+};
+
+int main(){
+
+
+	vector<int> num { 1, 2, 2, 3, 2, 3, 4 };
+  int k=4;
+	Combinatorics com = Combinatorics(num, k);
+	while (com.hasNext()) {
+		vector<int> vec=com.next();
+    for(int a:vec)
+    cout<<a<<" ";
+    cout<<endl;
+	}
+	return 0;
+}
